@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 #%% Variables globales de plots
 yscale = 1.01 # Escala para escoger el tamanno de los plots
-linewidth = 1 # Grosor de las lineas de plot
+lWidth = 1 # Grosor de las lineas de plot
 #%% Funciones
 def Blank_Spectra(lamb,flux, title = "Espectro", onlyObject = False):
     """
@@ -23,7 +23,7 @@ def Blank_Spectra(lamb,flux, title = "Espectro", onlyObject = False):
     fig.suptitle(title)
     ax.set_xlabel(r"$\lambda \ (\mathring{A})$")
     ax.set_ylabel("Flujo (unidades arbitrarias)")
-    ax.plot(lamb,flux, linewidth = 1)
+    ax.plot(lamb,flux, linewidth = lWidth)
     if onlyObject:
         return fig,ax # Devuelvo los ejes sin plottear
     fig.show()
@@ -41,38 +41,40 @@ def Lined_Spectra(lamb,flux,lines, title = "Lined_Spectra"):
     maxLine = np.max(flux)*yscale
     # Ploteamos las lineas
     for name in lines:
-        ax.vlines(lines[name], minLine,maxLine )
+        ax.vlines(lines[name], minLine,maxLine, label = name)
+    ax.legend(loc = "best")
     fig.show()
     return
 
-def Compare_Spectra(lamb1,flux1,lamb2,flux2,lines = {}, title = "Comparison between Spectras"):
+def Compare_Spectra(lambArr,fluxArr,lines = {}, title = "Comparison between Spectras"):
     """
     Compare_Spectra:
-        Ploteamos uno al lado del otro dos espectros para compararlos. Si se dan lineas
+        Ploteamos uno al lado del otro varios espectros para compararlos. Si se dan lineas
         como parametro opcional, las coloca tambien en ambos
+        
+    Entrada:
+        LambsArr: Array de array de longitudes de onda
+        FluxArr: Array de array de Flujos
     """
-    fig,ax = plt.subplots(2,1, figsize = (60,6),sharex=True, sharey=False)
-    ax[1].set_xlabel(r"$\lambda\ (\mathring{A})$")
+    n = len(lambArr)
+    fig,ax = plt.subplots(n,1, figsize = (60,6),sharex=True, sharey=False)
+    ax[n-1].set_xlabel(r"$\lambda\ (\mathring{A})$")
     
-    ax[1].set_ylabel("Flujo (uds arbitrarias)")
-    ax[0].set_ylabel("Flujo (uds arbitrarias)")
+    minLine = np.min(fluxArr)*yscale
+    maxLine = np.max(fluxArr)*yscale
     
-    ax[0].set_title("Spectra 1")
-    ax[1].set_title("Spectra 2")
+    for i in range(n):          
+        ax[i].set_ylabel("Flujo (uds arbitrarias)")
+        ax[i].set_title(f"Spectra {i}")
+        #Ploteamos los espectros
+        ax[i].plot(lambArr[i],fluxArr[i],linewidth = lWidth)
     
-    #Ploteamos los espectros
-    ax[0].plot(lamb1,flux1,linewidth = 1)
-    ax[1].plot(lamb2,flux2,linewidth = 1)
-    
-    # Ploteamos las lineas
-    minLine = np.min((flux1,flux2))*yscale
-    maxLine = np.max((flux1,flux2))*yscale
-    
-    ax[0].set_ylim(minLine,maxLine)
-    ax[1].set_ylim(minLine,maxLine)
+        ax[i].set_ylim(minLine,maxLine)
     for name in lines:
-        ax[0].vlines(lines[name], minLine,maxLine, color = "red")
-        ax[1].vlines(lines[name], minLine,maxLine, color = "red")
+        ax[0].plot((lines[name],lines[name]), (minLine,maxLine),label = name) # Este para el label
+        for i in range(1,n):
+            ax[i].plot((lines[name],lines[name]), (minLine,maxLine))
+    fig.legend()
     fig.show()
     return
     
