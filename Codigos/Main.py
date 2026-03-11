@@ -51,7 +51,15 @@ lineas_metalicas= {
     "Mg II 4481": 4481,
     "Si IV 4654": 4654,
     "Si IV 4631": 4631,
+    "Ti II 4179":4179,
     "Na (D2)": 5890
+    }
+
+lineas_fe= {
+    "Fe I 4383": 4383,
+    "Fe I 4271": 4271,
+    "Fe II 4233": 4233,
+    "Fe II 4172": 4172
     }
 
 lineas_balmer= {
@@ -78,6 +86,7 @@ lines= {}
 lines.update(lineas_metalicas)
 lines.update(lineas_balmer)
 lines.update(lineas_helio)
+lines.update(lineas_fe)
 
 #%% Obtencion de datos
 
