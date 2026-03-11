@@ -2,6 +2,10 @@
 parametros:
     Se encarga de tomar los archivos y calcular
     diversos parametros como la Temperatura y demas
+    
+Alguna libreria de parametros util
+https://sites.uni.edu/morgans/astro/course/Notes/section2/spectraltemps.html
+
 """
 
 
@@ -25,8 +29,7 @@ def get_Temp(lamb, flux): #Saca temperatura con Ley Wien
     """
 
     b= 2.8976e7 #Angstrom
-
-    index= np.where(np.max(flux))
+    index = np.where(flux == np.max(flux))
     """
     Index toma la posicion del maximo del flujo y se la guarda para luego
     poder sacar la longitud de onda que tenga esa posicion en el array de longitudes

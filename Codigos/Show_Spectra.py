@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 #%% Variables globales de plots
 yscale = 1.01 # Escala para escoger el tamanno de los plots
 lWidth = 1 # Grosor de las lineas de plot
+lineScale = 1 # Escala para las lineas atomicas
+ncol = 4 # Numero de columnas para la leyenda
 #%% Funciones
 def Blank_Spectra(lamb,flux, title = "Espectro", onlyObject = False):
     """
@@ -41,8 +43,9 @@ def Lined_Spectra(lamb,flux,lines, title = "Lined_Spectra"):
     maxLine = np.max(flux)*yscale
     # Ploteamos las lineas
     for name in lines:
-        ax.vlines(lines[name], minLine,maxLine, label = name)
-    ax.legend(loc = "best")
+        ax.vlines(lines[name], minLine,maxLine, label = name, linestyle = "dashed", linewidth = lWidth*lineScale)
+        ax[0].annotate(name,xy = (lines[name] + 5,maxLine -0.15*maxLine), xycoords = "data", ha = 'center', va = 'bottom')
+    ax.legend(loc = "best", ncol = ncol)
     fig.show()
     return
 
@@ -59,23 +62,28 @@ def Compare_Spectra(lambArr,fluxArr,TArr = [],lines = {}, title = "Comparison be
     """
     n = len(lambArr)
     fig,ax = plt.subplots(n,1, figsize = (60,6),sharex=True, sharey=False)
+    fig.subplots_adjust(hspace=0.001)
+    fig.suptitle(title)
     ax[n-1].set_xlabel(r"$\lambda\ (\mathring{A})$")
     
     minLine = np.min(fluxArr)*yscale
     maxLine = np.max(fluxArr)*yscale
-    
+    if len(TArr) == 0:
+        TArr = ["Not Estimated"] *n
     for i in range(n):          
         ax[i].set_ylabel("Flux (uds)")
-        ax[i].set_title(f"Spectra {i+1}  (Temp Estimada: {TArr[i]} K")
+        ax[i].set_title(f"Sp {i+1}  (T: {TArr[i]} K)",loc="right", y=.5,
+           rotation=270, ha="left", va="center")
         #Ploteamos los espectros
         ax[i].plot(lambArr[i],fluxArr[i],linewidth = lWidth)
     
         ax[i].set_ylim(minLine,maxLine)
     for name in lines:
-        ax[0].plot((lines[name],lines[name]), (minLine,maxLine),label = name) # Este para el label
+        currline = ax[0].plot((lines[name],lines[name]), (minLine,maxLine),label = name,linestyle = "dashed",linewidth = lWidth * lineScale) # Este para el label
+        ax[0].annotate(name,xy = (lines[name] + 5,maxLine -0.15*maxLine), xycoords = "data", ha = 'center', va = 'bottom')
         for i in range(1,n):
-            ax[i].plot((lines[name],lines[name]), (minLine,maxLine))
-    fig.legend()
+            ax[i].plot((lines[name],lines[name]), (minLine,maxLine), linestyle = "dashed",linewidth = lWidth * lineScale)
+    ax[0].legend(loc = "best", ncol = ncol)
     fig.show()
     return
     
