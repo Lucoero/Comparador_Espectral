@@ -63,4 +63,18 @@ def picos (wave, flux, lineas, dist=10):
             props.append(propiedades) #se añaden los datos a la lista. se pude hacer sin el apend pero es más coñazo porque la entrada es un diccionario
     return peaks, props
     
-      
+def categorizar(wave,flux,lineas,cat):
+    if cat == 'o' or cat == 'O':
+        return 0
+    elif cat == 'b' or cat == 'B':
+        '''
+        Aquí hay 3 criterios espectrales importantes:
+        1- Se presentan líneas de HeI pero no de HeII, aunque no es tan efectivo con la digitalización de los datos
+        2- Este criterio es el preferido SiIV 4089/SiIII 4552 para tipos tempranos, SiIII 4552/SiII 4128
+        3- Para líneas débiles de Si, MgI 4481/HeI 4471 el ratio incrementa con el subtipo hasta que ronda la unidad en B8
+        '''
+        return 0
+    elif cat == 'a' or cat == 'A':
+        return 0
+
+
