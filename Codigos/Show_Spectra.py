@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 yscale = 1.01 # Escala para escoger el tamanno de los plots
 lWidth = 1 # Grosor de las lineas de plot
 lineScale = 1 # Escala para las lineas atomicas
-ncol = 4 # Numero de columnas para la leyenda
+ncol = 1 # Numero de columnas para la leyenda
 #%% Funciones
 def Blank_Spectra(lamb,flux, title = "Espectro", onlyObject = False):
     """
