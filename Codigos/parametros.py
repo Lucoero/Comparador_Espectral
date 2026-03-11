@@ -64,17 +64,37 @@ def picos (wave, flux, lineas, dist=10):
     return peaks, props
     
 def categorizar(wave,flux,lineas,cat):
-    if cat == 'o' or cat == 'O':
-        return 0
-    elif cat == 'b' or cat == 'B':
-        '''
-        Aquí hay 3 criterios espectrales importantes:
-        1- Se presentan líneas de HeI pero no de HeII, aunque no es tan efectivo con la digitalización de los datos
-        2- Este criterio es el preferido SiIV 4089/SiIII 4552 para tipos tempranos, SiIII 4552/SiII 4128
-        3- Para líneas débiles de Si, MgI 4481/HeI 4471 el ratio incrementa con el subtipo hasta que ronda la unidad en B8
-        '''
-        return 0
-    elif cat == 'a' or cat == 'A':
-        return 0
-
-
+    """
+    INDICATIVOS PARA CADA TIPO ESPECTRAL:
+        1. TIPO O:
+                - Líneas de Halpha,beta y demás algo débiles (por saha se ha ionizado ya todo el H)
+                - Importante la linea de He I y He II
+            1.1 Para clasificar la luminosidad:
+                - Es muy util comparar la profundidad de las lineas He I y He II:
+                  A menor T, mayor profundidad de He I (por Saha) y menor de He II (por menor T)
+    
+        2. TIPO B:
+                Aquí hay 3 criterios espectrales importantes:
+                1- Se presentan líneas de HeI pero no de HeII, aunque no es tan efectivo con la digitalización de los datos
+                2- He I tiene su maximo en B2, y luego van bajando
+                3- Este criterio es el preferido SiIV 4089/SiIII 4552 para tipos tempranos, SiIII 4552/SiII 4128
+                5- Tambien importa el ratio He I 4471 y Mg II 4481: A menor T, menor He I y mayor Mg II
+                6- Para líneas débiles de Si, MgI 4481/HeI 4471 el ratio incrementa con el subtipo hasta que ronda la unidad en B8
+        3. TIPO A:
+                - Las lineas de H I desaparecen (ojo, estas son las de ionizacion no las de Balmer)
+                - Las lineas de He I tambien desaparecen
+                - Empiezan a verse lineas de metalicidad. En especial las de Fe II 4383.
+                - Sigue habiendo lineas de H8 y H0, y en este tipo acaban alcanzando su maximo.
+        4. TIPO F:
+                - Se van debilitando las lineas H8, H9
+                - Es importante la linea Ca II, que se vuelve super profunda hasta saturar
+                - Empieza a haber una fusion entre CaII H + Hepsi
+                
+            
+        5. TIPO G:
+        
+        6. TIPO K:
+        
+        7. TIPO M:
+    """
+    return "Hola"
