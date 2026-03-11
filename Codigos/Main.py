@@ -43,16 +43,41 @@ Nota: Lineas mas destacables
     
     Otros metales (Fe,Mg,Si)
 """
-lineas= {
+
+lineas_metalicas= {
+    "Ca I 4227": 4227,
+    "Ca II (K)": 3934,
+    "Ca II (H)": 3968,
+    "Mg II 4481": 4481,
+    "Si IV 4654": 4654,
+    "Si IV 4631": 4631,
+    "Na (D2)": 5890
+    }
+
+lineas_balmer= {
     r'$H_{\alpha}$': 6563,
     r'$H_{\gamma}$': 4861,
     r'$H_{\delta}$': 4340,
-    r'$H_{\epsilon}$': 4120,
-    "He I": 5875,
-    "Ca II (K)": 3933,
-    "Ca II (H)": 3968,
-    "Na (D2)": 5890
+    r'$H_{\epsilon}$': 4120,   
     }
+
+lineas_helio= {
+    "He I 5875": 5875,
+    "He I 4922": 4922,
+    "He I 4713": 4713,
+    "He I 4471": 4471,
+    "He I 4388": 4388,
+    "He I 4144": 4144,
+    "He II 4686": 4686,
+    "He II 4542": 4542,
+    "He II 4200": 4200,
+    "He I + II 4026": 4026  
+    }
+
+lines= {}
+lines.update(lineas_metalicas)
+lines.update(lineas_balmer)
+lines.update(lineas_helio)
 
 #%% Obtencion de datos
 
@@ -77,6 +102,6 @@ FluxsArr = np.array([Flux1,Flux2,Flux3,Flux4],dtype = object)
 #%% Normalizacion
 #%% Ploteado
 
-SSp.Compare_Spectra(LambsArr,FluxsArr,TArr = TArr,lines = lineas)
+SSp.Compare_Spectra(LambsArr,FluxsArr,TArr = TArr,lines = lines)
 
 #SSp.Blank_Spectra(MLamb, MFlux)
