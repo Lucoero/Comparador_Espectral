@@ -115,13 +115,13 @@ TArr = np.array([T1,T2,T3,T4])
 LambsArr = np.array([Lamb1,Lamb2,Lamb3,Lamb4],dtype = object)
 FluxsArr = np.array([Flux1,Flux2,Flux3,Flux4],dtype = object)
 #%% Normalizacion
-nIter = 10
+nIter = 50
 params = [97] # Es el filtro de mediana (que separacion consideras para cortar y tal)
 
-A1,N1 = Norm.Normalizar(Flux1,params,iteraciones = nIter)
-A2,N2 = Norm.Normalizar(Flux2,params,iteraciones = nIter)
-A3,N3 = Norm.Normalizar(Flux3,params,iteraciones = nIter)
-A4,N4 = Norm.Normalizar(Flux4,params,iteraciones = nIter)
+fit1,N1 = Norm.Normalizar(Lamb1,Flux1,params,iteraciones = nIter)
+fit2,N2 = Norm.Normalizar(Lamb2,Flux2,params,iteraciones = nIter)
+fit3,N3 = Norm.Normalizar(Lamb3,Flux3,params,iteraciones = nIter)
+fit4,N4 = Norm.Normalizar(Lamb4,Flux4,params,iteraciones = nIter)
 #%% Ploteado
 
 
@@ -140,8 +140,8 @@ normalizado2 = np.array([Lamb2,N2],dtype = object)
 normalizado3 = np.array([Lamb3,N3],dtype = object)
 normalizado4 = np.array([Lamb4,N4],dtype = object)
 
-
 defArr = np.array([normal1,normal2,normal3,normal4])
 normArr = np.array([normalizado1,normalizado2,normalizado3,normalizado4])
 
-SSp.Compare_Norms(defArr,normArr,fitArr = [A1,A2,A3,A4], lines = lines)
+fitArr = np.array([fit1,fit2,fit3,fit4],dtype = object)
+SSp.Compare_Norms(defArr,normArr,fitArr = fitArr, lines = lines)

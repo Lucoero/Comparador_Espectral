@@ -19,7 +19,7 @@ def Filtrar(flux, params, tipo='med'):
     elif tipo == 'h':
         return hilbert(flux)
 
-def Normalizar(flujo, params,corte = 9000 ,  filtro = 'med', iteraciones = 1): #Donde filtro es el tipo de filtro segun filtrar
+def Normalizar(lamb,flujo, params,start = 4000, end = -1,  filtro = 'med', iteraciones = 1): #Donde filtro es el tipo de filtro segun filtrar
     """
     Los tipos de filtro posibles son:
         
@@ -43,17 +43,22 @@ def Normalizar(flujo, params,corte = 9000 ,  filtro = 'med', iteraciones = 1): #
     ajuste hecho
     flujo normalizado
 """
-#TODO: HACER EL CORTE
-    normalizada_vieja = flujo
+    ajuste = np.copy(flujo)
+    start_index = np.where(lamb > start)[0][0]
+    
+    normalizada_vieja = flujo[start_index:end]
+    lamb_cortado = lamb[start_index:end]
+    
+    
     for i in range(iteraciones):
         normalizada_nueva = Filtrar(normalizada_vieja,params, tipo= filtro)
         normalizada_vieja = normalizada_nueva
         
-    # Ya esta ajustada
-    ajuste = normalizada_vieja
+    # Fin ajuste
+    ajuste[start_index:end] = normalizada_vieja
     
     # Ahora normalizamos
     flujo_normalizado = flujo/ajuste
-    return ajuste,flujo_normalizado
+    return np.array([lamb_cortado,normalizada_vieja],dtype = object),flujo_normalizado 
     
     
