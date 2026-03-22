@@ -19,23 +19,41 @@ def Filtrar(flux, params, tipo='med'):
     elif tipo == 'h':
         return hilbert(flux)
 
-def Normalizar(filtro, flujo, parametro, iteraciones): #Donde filtro es el tipo de filtro segun filtrar
-    
-    '''
+def Normalizar(flujo, params,corte = 9000 ,  filtro = 'med', iteraciones = 1): #Donde filtro es el tipo de filtro segun filtrar
+    """
     Los tipos de filtro posibles son:
         
         med
         mmed
         sg
         h
-    '''
+    El corte es a partir de que longitud de onda (Armstrongs) queremos empezar a normalizar
+    ----------
+    filtro : TYPE
+        DESCRIPTION.
+    flujo : TYPE
+        DESCRIPTION.
+    parametro : TYPE
+        DESCRIPTION.
+    iteraciones : TYPE
+        DESCRIPTION.
 
-    normalizada_vieja= flujo
+    Returns
+    -------
+    ajuste hecho
+    flujo normalizado
+"""
+#TODO: HACER EL CORTE
+    normalizada_vieja = flujo
     for i in range(iteraciones):
-        normalizada_nueva= Filtrar(normalizada_vieja,parametro, tipo= filtro)
+        normalizada_nueva = Filtrar(normalizada_vieja,params, tipo= filtro)
         
-        normalizada_vieja= normalizada_nueva
+        normalizada_vieja = normalizada_nueva
+    # Ya esta ajustada
+    ajuste = normalizada_vieja
     
-    return normalizada_vieja
+    # Ahora normalizamos
+    flujo_normalizado = flujo/ajuste
+    return ajuste,flujo_normalizado
     
     

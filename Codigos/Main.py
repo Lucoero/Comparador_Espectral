@@ -9,7 +9,7 @@ import Load_Data as LD
 import Show_Spectra as SSp
 import parametros as Par
 import Herramientas as Herr
-import normalizar as norm
+import normalizar as Norm
 
 
 
@@ -115,24 +115,33 @@ TArr = np.array([T1,T2,T3,T4])
 LambsArr = np.array([Lamb1,Lamb2,Lamb3,Lamb4],dtype = object)
 FluxsArr = np.array([Flux1,Flux2,Flux3,Flux4],dtype = object)
 #%% Normalizacion
-'''
-start= np.where(Flux1 == np.max(Flux1))
-Nada, Lamb1_lineas,Nada2= Herr.BuscadorMinimos(np.array([Lamb1,Flux1],dtype= object),start)
+nIter = 2
+params = [97] # Es el filtro de mediana (que separacion consideras para cortar y tal)
+
+A1,N1 = Norm.Normalizar(Flux1,params,iteraciones = nIter)
+A2,N2 = Norm.Normalizar(Flux2,params,iteraciones = nIter)
+A3,N3 = Norm.Normalizar(Flux3,params,iteraciones = nIter)
+A4,N4 = Norm.Normalizar(Flux4,params,iteraciones = nIter)
 #%% Ploteado
-'''
-
-SSp.Compare_Spectra(LambsArr,FluxsArr,TArr = TArr,lines = lines)
-plt.show()
-"""
-#SSp.Blank_Spectra(MLamb, MFlux)
-par = [93]
-y = norm.filtro(Flux4,par)
-y= norm.filtro(y,par)
-y= norm.filtro(y,par)#
 
 
-plt.plot(Lamb1, Flux1)
-plt.plot(Lamb1, y)
-plt.show()
-plt.plot(Lamb1,[Flux1[i]/y[i] for i in range(len(Flux1))])
-"""
+#SSp.Compare_Spectra(LambsArr,FluxsArr,TArr = TArr,lines = lines)
+
+#SSp.Blank_Spectra(Lamb1,N1)
+
+# Array de todas las normalizaciones para comparar
+normal1 = np.array([Lamb1,Flux1],dtype = object)
+normal2 = np.array([Lamb2,Flux2],dtype = object)
+normal3 = np.array([Lamb3,Flux3],dtype = object)
+normal4 = np.array([Lamb4,Flux4],dtype = object)
+
+normalizado1 = np.array([Lamb1,N1],dtype = object)
+normalizado2 = np.array([Lamb2,N2],dtype = object)
+normalizado3 = np.array([Lamb3,N3],dtype = object)
+normalizado4 = np.array([Lamb4,N4],dtype = object)
+
+
+defArr = np.array([normal1,normal2,normal3,normal4])
+normArr = np.array([normalizado1,normalizado2,normalizado3,normalizado4])
+
+SSp.Compare_Norms(defArr,normArr,fitArr = [A1,A2,A3,A4], lines = lines)
