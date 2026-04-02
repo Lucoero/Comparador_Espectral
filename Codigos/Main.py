@@ -129,10 +129,10 @@ fitMiles,NMiles = Norm.Normalizar(MLamb,MFlux,iteraciones = 50)
 SSp.Compare_Norms(np.array([np.array([MLamb,MFlux],dtype = object)]),np.array([np.array([MLamb,NMiles],dtype = object)]), np.array([fitMiles]))
 """
 #%% Busqueda del espectro (KS)
-smChosen1,minD1,DArr1 = Par.CompareAllSpectra("Catalogo_Miles",(Lamb1,Flux1),lines = lines)
-smChosen2,minD2,DArr2 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb2,Flux2),lines = lines)
-smChosen3,minD3,DArr3 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb3,Flux3),lines = lines)
-smChosen4,minD4,DArr4 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb4,Flux4), lines = lines)
+smChosen1,minD1,DArr1 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb1,Flux1),lines = lines, distFunc = "WASS")
+smChosen2,minD2,DArr2 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb2,Flux2),lines = lines,distFunc = "WASS")
+smChosen3,minD3,DArr3 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb3,Flux3),lines = lines,distFunc = "WASS")
+smChosen4,minD4,DArr4 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb4,Flux4), lines = lines,distFunc = "WASS")
 #%% Ploteado
 """
 #SSp.Compare_Spectra(LambsArr,FluxsArr,TArr = TArr,lines = lines)

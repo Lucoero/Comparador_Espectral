@@ -22,7 +22,8 @@ import tqdm as tqdm
 
 from scipy.interpolate import make_smoothing_spline
 from scipy.stats import kstest
-
+import scipy.spatial.distance as distances
+import scipy.stats as stats
 import Load_Data as Load
 import normalizar as normalizar
 import Show_Spectra as SSp
@@ -108,7 +109,7 @@ def categorizar(wave,flux,lineas,cat):
     """
     return "Hola"
 
-def CompareAllSpectra(dataFolder,objSpectra, outFolder = "Outputs", nPoints = 10**4, lines = {}):
+def CompareAllSpectra(dataFolder,objSpectra, outFolder = "Outputs", nPoints = 10**4, lines = {}, distFunc = "KS"):
     """
     CompareAllSpectra
     Dada una carpeta con ficheros en formato miles ([lambda,flux]), y un espectro problema en formato
@@ -122,6 +123,7 @@ def CompareAllSpectra(dataFolder,objSpectra, outFolder = "Outputs", nPoints = 10
     Si KS no va bien podemos usar Chi^2
     Renormalizamos los espectros
     """
+    print(60*"*" + "\nPREPARING COMPARISON WITH SPECTRAS" +"\n" +60*"*")
     spLamb = objSpectra[0].copy()
     spFlux = objSpectra[1].copy()
     if not os.path.exists(dataFolder):
@@ -160,9 +162,15 @@ def CompareAllSpectra(dataFolder,objSpectra, outFolder = "Outputs", nPoints = 10
         smInterpol =  make_smoothing_spline(smLamb, smFlux,lam = 0)
         # Comparo KS en un mismo dominio
         lambArr = np.linspace(minLamb, maxLamb,int(nPoints))
-        ksResult = kstest(smInterpol(lambArr),spInterpol(lambArr))
+        if distFunc == "KS":
+            result = kstest(smInterpol(lambArr),spInterpol(lambArr))[0] # Podriamos guardar tambien los pvalues
+        elif distFunc == "WASS":
+            result = stats.wasserstein_distance(smInterpol(lambArr), spInterpol(lambArr))
+        else:
+            print("No coincide con ninguna")
+            result = 0
         # Almaceno los resultados
-        DArr[i] = ksResult[0] # Podriamos guardar tambien los pvalues
+        DArr[i] = result 
         
     # Tomo el minimo 
     minD = np.min(DArr)    
