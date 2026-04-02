@@ -4,6 +4,8 @@ Main
 """
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.interpolate as interpolate
+
 
 import Load_Data as LD
 import Show_Spectra as SSp
@@ -23,7 +25,7 @@ S3 = "estrella3.dat"
 S4 = "estrella4.dat"
 
 # Espectros del catalogo MILES. https://research.iac.es/proyecto/miles/pages/stellar-libraries/the-catalogue.php
-Miles_Name = "s0010.fits"
+Miles_Name = "s0001.fits"
 
 
 # Diccionario de lineas que vamos a marcar
@@ -104,7 +106,7 @@ Lamb3,Flux3 = LD.Load_Dat(S3)
 
 Lamb4,Flux4 = LD.Load_Dat(S4)
 
-#MLamb,MFlux = LD.Load_Miles(Miles_Name)
+MLamb,MFlux = LD.Load_Miles(Miles_Name)
 
 T1 = Par.get_Temp(Lamb1, Flux1)
 T2 = Par.get_Temp(Lamb2, Flux2)
@@ -122,9 +124,13 @@ fit1,N1 = Norm.Normalizar(Lamb1,Flux1,params,iteraciones = nIter)
 fit2,N2 = Norm.Normalizar(Lamb2,Flux2,params,iteraciones = nIter)
 fit3,N3 = Norm.Normalizar(Lamb3,Flux3,params,iteraciones = nIter)
 fit4,N4 = Norm.Normalizar(Lamb4,Flux4,params,iteraciones = nIter)
+
+fitMiles,NMiles = Norm.Normalizar(MLamb,MFlux,iteraciones = 50)
+SSp.Compare_Norms(np.array([np.array([MLamb,MFlux],dtype = object)]),np.array([np.array([MLamb,NMiles],dtype = object)]), np.array([fitMiles]))
+#%% Busqueda del espectro (KS)
+smChosen,minD,DArr = Par.CompareAllSpectra("Catalogo_Miles",(Lamb1,Flux1))
 #%% Ploteado
-
-
+"""
 #SSp.Compare_Spectra(LambsArr,FluxsArr,TArr = TArr,lines = lines)
 
 #SSp.Blank_Spectra(Lamb1,N1)
@@ -145,3 +151,4 @@ normArr = np.array([normalizado1,normalizado2,normalizado3,normalizado4])
 
 fitArr = np.array([fit1,fit2,fit3,fit4],dtype = object)
 SSp.Compare_Norms(defArr,normArr,fitArr = fitArr, lines = lines)
+"""

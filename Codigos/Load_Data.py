@@ -8,7 +8,7 @@ import numpy as np
 from astropy.io import fits
 #%% Funciones
 
-def Load_Dat(filename, path = "Estrellas_Problema"):
+def Load_Dat(filename, path = "Estrellas_Problema", endMessage = False):
     """
     Load_Dat
     
@@ -22,12 +22,12 @@ def Load_Dat(filename, path = "Estrellas_Problema"):
         raise
         print(f"ERROR: No se ha podido cargar correctamente el fichero en path:\n {base_name}")
         return None, None
-    
-    print(f"Se ha leido con exito el fichero {filename}. Se ha devuelto en formato [longitud_onda, flujo]")
-    print("-"*40)
+    if endMessage: 
+        print(f"Se ha leido con exito el fichero {filename}. Se ha devuelto en formato [longitud_onda, flujo]")
+        print("-"*40)
     return lamb,flux
 
-def Load_Miles(filename,path = "Catalogo_Miles"):
+def Load_Miles(filename,path = "Catalogo_Miles", endMessage = False):
     """
     Load_Miles
     
@@ -50,6 +50,7 @@ def Load_Miles(filename,path = "Catalogo_Miles"):
     except:
         print(f"ERROR: NO SE HA PODIDO OBTENER EL ARCHIVO EN EL PATH {base_name}")
         return None, None
-    print(f"Se ha leido con exito el fichero {filename}. Se ha devuelto en formato [longitud_onda, flujo]")
-    print("-"*40)
-    return wavelength, flux
+    if endMessage:
+        print(f"Se ha leido con exito el fichero {filename}. Se ha devuelto en formato [longitud_onda, flujo]")
+        print("-"*40)
+    return np.array(wavelength,dtype = float), np.array(flux, dtype = float) # Para evitar dtype = float 

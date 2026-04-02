@@ -19,7 +19,7 @@ def Filtrar(flux, params, tipo='med'):
     elif tipo == 'h':
         return hilbert(flux)
 
-def Normalizar(lamb,flujo, params,start = 4000, end = -1,  filtro = 'med', iteraciones = 1): #Donde filtro es el tipo de filtro segun filtrar
+def Normalizar(lamb,flujo, params = [97],start = 4000, end = -1,  filtro = 'med', iteraciones = 1): #Donde filtro es el tipo de filtro segun filtrar
     """
     Los tipos de filtro posibles son:
         
@@ -28,18 +28,6 @@ def Normalizar(lamb,flujo, params,start = 4000, end = -1,  filtro = 'med', itera
         sg
         h
     El corte es a partir de que longitud de onda (Armstrongs) queremos empezar a normalizar
-    ----------
-    filtro : TYPE
-        DESCRIPTION.
-    flujo : TYPE
-        DESCRIPTION.
-    parametro : TYPE
-        DESCRIPTION.
-    iteraciones : TYPE
-        DESCRIPTION.
-
-    Returns
-    -------
     ajuste hecho
     flujo normalizado
 """
@@ -49,16 +37,17 @@ def Normalizar(lamb,flujo, params,start = 4000, end = -1,  filtro = 'med', itera
     normalizada_vieja = flujo[start_index:end]
     lamb_cortado = lamb[start_index:end]
     
-    
     for i in range(iteraciones):
-        normalizada_nueva = Filtrar(normalizada_vieja,params, tipo= filtro)
+        normalizada_nueva = Filtrar(normalizada_vieja,params, tipo = filtro)
         normalizada_vieja = normalizada_nueva
         
     # Fin ajuste
     ajuste[start_index:end] = normalizada_vieja
-    
+    # Nos quitamos el ajuste de 0 porque si no se hacen nans
+    ajuste = np.where(ajuste > 0., ajuste, 1.)
     # Ahora normalizamos
     flujo_normalizado = flujo/ajuste
+    
     return np.array([lamb_cortado,normalizada_vieja],dtype = object),flujo_normalizado 
     
     

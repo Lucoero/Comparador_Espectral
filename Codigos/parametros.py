@@ -8,7 +8,7 @@ https://sites.uni.edu/morgans/astro/course/Notes/section2/spectraltemps.html
 
 """
 
-
+import os as os
 import re
 import numpy as np
 from astropy.io import fits
@@ -18,8 +18,14 @@ from astropy.visualization import quantity_support
 from pathlib import Path
 from scipy.signal import convolve
 from scipy.signal import find_peaks, peak_prominences, peak_widths
+import tqdm as tqdm
 
+from scipy.interpolate import make_smoothing_spline
+from scipy.stats import kstest
 
+import Load_Data as Load
+import normalizar as normalizar
+import Show_Spectra as SSp
 #%% Temperatura
 
 def get_Temp(lamb, flux): #Saca temperatura con Ley Wien
@@ -101,3 +107,72 @@ def categorizar(wave,flux,lineas,cat):
                 - Ca I 4226 es un valle cada vez mas prominente
     """
     return "Hola"
+
+def CompareAllSpectra(dataFolder,objSpectra, outFolder = "Outputs", nPoints = 10**4):
+    """
+    CompareAllSpectra
+    Dada una carpeta con ficheros en formato miles ([lambda,flux]), y un espectro problema en formato
+    ([lambda, flux]), ambos normalizados. Se realiza el siguiente proceso:
+        1. Interpolamos total (con picos y todo) el espectro problema (sp).
+        2. Cogemos un espectro de miles (sm). Le realizamos una interpolacion total (con picos y todo)
+        3. Calculamos KS entre las distribuciones. Usamos un dominio con un numero total de puntos nPoints Almacenamos el valor de la distancia en un array [Di]
+        4. Cogemos el siguiente espectro y repetimos (2,3)
+        6. Cogemos el minimo del array. Buscamos su sm correspondiente por indice
+        
+    Si KS no va bien podemos usar Chi^2
+    Renormalizamos los espectros
+    """
+    spLamb = objSpectra[0].copy()
+    spFlux = objSpectra[1].copy()
+    if not os.path.exists(dataFolder):
+        print(f"ERROR: No existe el directorio con archivos miles: \n {dataFolder}")
+        return None
+    FilesArr = os.listdir(dataFolder)
+    n = len(FilesArr)
+    DArr = np.zeros(n)
+    #pArr = np.zeros(n) # Array de p-values relacionados con el test.
+    
+    # Ajusto el objetivo con splines
+    """
+    ASUNTO IMPORTANTE: SI EL DOMINIO DE LAMBDAS DEL MILES ES MENOR AL DE LOS ESPECTROS
+    OBJETIVO, AL HACER EL AJUSTE ESTE DEBE EXTRAPOLAR EL MILES HASTA LAS LAMBDAS NECESARIAS.
+    ESTO HACE QUE HAYA UNA "COLA" EXPONENCIAL QUE METE ERROR.
+    ASI QUE LO QUE HAY QUE HACER ES TRUNCAR LAS LAMBDAS, NUNCA EXTRAPOLAR
+    """
+        # Normalizamos 
+    spFit, spFlux = normalizar.Normalizar(spLamb,spFlux, iteraciones = 50)
+    spInterpol = make_smoothing_spline(spLamb, spFlux,lam = 0)
+    spMinLamb = np.min(spLamb)
+    spMaxLamb = np.max(spLamb)
+    # Voy archivo a archivo de Miles analizando
+    for i in tqdm.tqdm(range(n)):
+        smLamb,smFlux = Load.Load_Miles(FilesArr[i], path = dataFolder)
+        # Normalizo
+        smFit,smFlux = normalizar.Normalizar(smLamb, smFlux, iteraciones = 50)
+        # Compruebo si el espectro problema o el objetivo tiene menor rango de lambdas
+        minLamb = min(np.min(smLamb),spMinLamb)
+        maxLamb = max(np.max(smLamb),spMaxLamb)
+        # Ajusto con splines
+        smInterpol =  make_smoothing_spline(smLamb, smFlux,lam = 0)
+        # Comparo KS en un mismo dominio
+        lambArr = np.linspace(minLamb, maxLamb,int(nPoints))
+        ksResult = kstest(smInterpol(lambArr),spInterpol(lambArr),N = len(lambArr))
+        # Almaceno los resultados
+        DArr[i] = ksResult[0] # Podriamos guardar tambien los pvalues
+        
+    # Tomo el minimo 
+    minD = np.min(DArr)    
+    indexMin = np.where(DArr == minD)
+    # Busco a que espectro corresponde
+    smChosen = FilesArr[indexMin]
+    # Printeo el resultado
+    print(f"KS Tests says that {smChosen} is the most probable type with distance {minD}")
+    print("Showing the comparison of spectras")
+    # Printeamos la comparacion
+    smLamb,smFlux = Load.Load_Miles(smChosen, path = dataFolder)
+    smFit,smNormFlux = normalizar.Normalizar(smLamb, smFlux)
+    defArr = np.array([np.array([objSpectra[0],objSpectra[1]],dtype = object),np.array([smLamb,smFlux],dtype = object)])
+    normArr = np.array([np.array([spLamb,spFlux],dtype = object),np.array([smLamb,smNormFlux],dtype = object)])
+    #fitArr = np.array([np.array([spLamb,spInterpol(spLamb)],dtype = object),np.array([smLamb])]) # Ya se vera si se pone
+    SSp.Compare_Norms(defArr, normArr, fitArr = [])
+    return smChosen,minD,DArr

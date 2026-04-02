@@ -14,6 +14,14 @@ lWidth = 1 # Grosor de las lineas de plot
 lineScale = 1 # Escala para las lineas atomicas
 ncol = 1 # Numero de columnas para la leyenda
 #%% Funciones
+def Pad_Array(arr): # Gracias, https://stackoverflow.com/questions/24494356/how-to-find-min-max-values-in-array-of-variable-length-arrays-with-numpy    
+    M = max(len(a) for a in arr) # Calculamos la longitud maxima de los arrays
+    out = np.zeros((len(arr),M),dtype = object)
+    for i in range(len(arr)):
+        out[i] = np.array(list(arr[i])+[np.nan]*(M-len(arr[i])))
+    return out
+
+
 def Blank_Spectra(lamb,flux, title = "Espectro"):
     """
     Blank_Spectra:
@@ -63,8 +71,8 @@ def Compare_Spectra(lambArr,fluxArr,TArr = [],lines = {}, title = "Comparison be
         como parametro opcional, las coloca tambien en ambos
         
     Entrada:
-        LambsArr: Array de array de longitudes de onda
-        FluxArr: Array de array de Flujos
+        LambsArr: Array de arrays de longitudes de onda
+        FluxArr: Array de arrays de Flujos
         TArr: Array de temperaturas de cada una
     """
     n = len(lambArr)
@@ -75,7 +83,7 @@ def Compare_Spectra(lambArr,fluxArr,TArr = [],lines = {}, title = "Comparison be
     Axe_Compare_Spectra(lambArr,fluxArr,ax, TArr = TArr, lines = lines,show_T = show_T)
     fig.legend(ncol = ncol)
     fig.show()
-    return # Por si quiero reciclar
+    return
 
 def Axe_Compare_Spectra(lambArr,fluxArr, ax,TArr = [],lines = {},show_T = True):
     """
@@ -85,8 +93,11 @@ def Axe_Compare_Spectra(lambArr,fluxArr, ax,TArr = [],lines = {},show_T = True):
     n = len(ax)
     ax[n-1].set_xlabel(r"$\lambda\ (\mathring{A})$")
     
-    minLine = np.min(fluxArr)*yscale
-    maxLine = np.max(fluxArr)*yscale
+    # Esto da problemas si el array de flujos no es una matriz cuadrada
+        # Arreglo: creamos una matriz cuadrada con nans y buscamos ahi
+    pad = Pad_Array(fluxArr) 
+    minLine = np.nanmin(pad)*yscale
+    maxLine = np.nanmax(pad)*yscale
     if len(TArr) == 0:
         TArr = ["Not Estimated"] *n
     for i in range(n):          
