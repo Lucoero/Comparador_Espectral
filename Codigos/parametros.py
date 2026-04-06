@@ -175,13 +175,15 @@ def CompareAllSpectra(dataFolder,objSpectra, outFolder = "Outputs", nPoints = 10
     # Organizo el array de minimos para ordenarlos de menor a mayor
     DSorted = np.sort(DArr)
     minD = DSorted[:nCandidates] # Tomamos N candidatos con la minima distancia posible
-    indexMin = np.where(DArr == minD)[0][0] # Tomamos los indices
-    # Busco a que espectro corresponde
-    smChosen = FilesArr[indexMin]
+    smChosen = []
+    for i in range(nCandidates):
+        currIndex = np.where(DArr == DSorted[i])[0][0]
+        smChosen.append(FilesArr[currIndex])
+    smChosen = np.array(smChosen)
     # Printeo el resultado
     print(f"KS Tests says that {smChosen[0]} is the most probable spectra with distance {minD[0]}. \n The {nCandidates} Rest Candidates are in the following order:")
-    for i in range(len(smChosen)):
-        print(f"{i}:", smChosen)
+    for i in range(nCandidates):
+        print(f"{i+1}:", smChosen[i]) 
     print("Showing the comparison of spectras for the minimun distance")
     # Printeamos la comparacion
     smLamb,smFlux = Load.Load_Miles(smChosen[0], path = dataFolder)

@@ -27,7 +27,7 @@ S4 = "estrella4.dat"
 # Espectros del catalogo MILES. https://research.iac.es/proyecto/miles/pages/stellar-libraries/the-catalogue.php
 Miles_Name = "s0001.fits"
 
-nCandidates = 10 # El numero de candidatos que queremos devolver 
+nCan = 5 # El numero de candidatos que queremos devolver 
 # Diccionario de lineas que vamos a marcar
 """
 Nota: Lineas mas destacables
@@ -124,15 +124,16 @@ fit1,N1 = Norm.Normalizar(Lamb1,Flux1,params,iteraciones = nIter)
 fit2,N2 = Norm.Normalizar(Lamb2,Flux2,params,iteraciones = nIter)
 fit3,N3 = Norm.Normalizar(Lamb3,Flux3,params,iteraciones = nIter)
 fit4,N4 = Norm.Normalizar(Lamb4,Flux4,params,iteraciones = nIter)
+
 """
 fitMiles,NMiles = Norm.Normalizar(MLamb,MFlux,iteraciones = 50)
 SSp.Compare_Norms(np.array([np.array([MLamb,MFlux],dtype = object)]),np.array([np.array([MLamb,NMiles],dtype = object)]), np.array([fitMiles]))
 """
 #%% Busqueda del espectro (KS)
-smChosen1,minD1,smChosen1,DArr1 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb1,Flux1),lines = lines, distFunc = "WASS", nCandidates = nCandidates)
-smChosen2,minD2,smChosen2,DArr2 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb2,Flux2),lines = lines,distFunc = "WASS", nCandidates = nCandidates)
-smChosen3,minD3,smChosen3,DArr3 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb3,Flux3),lines = lines,distFunc = "WASS", nCandidates = nCandidates)
-smChosen4,minD4,smChosen4,DArr4 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb4,Flux4), lines = lines,distFunc = "WASS", nCandidates = nCandidates)
+smChosen1,minD1,smChosen1,DArr1 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb1,Flux1),lines = lines, distFunc = "WASS", nCandidates = nCan)
+smChosen2,minD2,smChosen2,DArr2 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb2,Flux2),lines = lines,distFunc = "WASS", nCandidates = nCan)
+smChosen3,minD3,smChosen3,DArr3 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb3,Flux3),lines = lines,distFunc = "WASS", nCandidates = nCan)
+smChosen4,minD4,smChosen4,DArr4 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb4,Flux4), lines = lines,distFunc = "WASS", nCandidates = nCan)
 #%% Ploteado
 """
 #SSp.Compare_Spectra(LambsArr,FluxsArr,TArr = TArr,lines = lines)
