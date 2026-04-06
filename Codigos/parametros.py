@@ -109,14 +109,14 @@ def categorizar(wave,flux,lineas,cat):
     """
     return "Hola"
 
-def CompareAllSpectra(dataFolder,objSpectra, outFolder = "Outputs", nPoints = 10**4, lines = {}, distFunc = "KS"):
+def CompareAllSpectra(dataFolder,objSpectra, outFolder = "Outputs", nPoints = 10**4, lines = {}, distFunc = "WASS", nCandidates = 1):
     """
     CompareAllSpectra
     Dada una carpeta con ficheros en formato miles ([lambda,flux]), y un espectro problema en formato
     ([lambda, flux]), ambos normalizados. Se realiza el siguiente proceso:
         1. Interpolamos total (con picos y todo) el espectro problema (sp).
-        2. Cogemos un espectro de miles (sm). Le realizamos una interpolacion total (con picos y todo)
-        3. Calculamos KS entre las distribuciones. Usamos un dominio con un numero total de puntos nPoints Almacenamos el valor de la distancia en un array [Di]
+        2. Cogemos un espectro de miles (sm). Lo normalizamos y le realizamos una interpolacion total (con picos y todo)
+        3. Calculamos la distancia entre las distribuciones. Usamos un dominio con un numero total de puntos nPoints Almacenamos el valor de la distancia en un array [Di]
         4. Cogemos el siguiente espectro y repetimos (2,3)
         6. Cogemos el minimo del array. Buscamos su sm correspondiente por indice
         
@@ -172,16 +172,19 @@ def CompareAllSpectra(dataFolder,objSpectra, outFolder = "Outputs", nPoints = 10
         # Almaceno los resultados
         DArr[i] = result 
         
-    # Tomo el minimo 
-    minD = np.min(DArr)    
-    indexMin = np.where(DArr == minD)[0][0]
+    # Organizo el array de minimos para ordenarlos de menor a mayor
+    DSorted = np.sort(DArr)
+    minD = DSorted[:nCandidates] # Tomamos N candidatos con la minima distancia posible
+    indexMin = np.where(DArr == minD)[0][0] # Tomamos los indices
     # Busco a que espectro corresponde
     smChosen = FilesArr[indexMin]
     # Printeo el resultado
-    print(f"KS Tests says that {smChosen} is the most probable spectra with distance {minD}")
-    print("Showing the comparison of spectras")
+    print(f"KS Tests says that {smChosen[0]} is the most probable spectra with distance {minD[0]}. \n The {nCandidates} Rest Candidates are in the following order:")
+    for i in range(len(smChosen)):
+        print(f"{i}:", smChosen)
+    print("Showing the comparison of spectras for the minimun distance")
     # Printeamos la comparacion
-    smLamb,smFlux = Load.Load_Miles(smChosen, path = dataFolder)
+    smLamb,smFlux = Load.Load_Miles(smChosen[0], path = dataFolder)
     smFit,smNormFlux = normalizar.Normalizar(smLamb, smFlux, iteraciones = 50)
     defArr = np.empty((2,2), dtype=object)
     defArr[0,0] = objSpectra[0]
@@ -199,4 +202,4 @@ def CompareAllSpectra(dataFolder,objSpectra, outFolder = "Outputs", nPoints = 10
     #fitArr = np.array([spFit,smFit],dtype = object)
     #fitArr = np.array([np.array([spLamb,spInterpol(spLamb)],dtype = object),np.array([smLamb])]) # Ya se vera si se pone
     SSp.Compare_Norms(defArr, normArr,title = f"Candidato para espectro: {smChosen} con D = {minD}", lines=lines)
-    return smChosen,minD,DArr
+    return smChosen,minD,smChosen,DArr
