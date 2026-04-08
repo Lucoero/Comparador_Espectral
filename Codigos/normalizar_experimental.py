@@ -1,17 +1,17 @@
 
-
+import numpy as np
 
 import normalizar
-import parametros
+from parametros import *
 import Herramientas
 
 
 
-def puta(l,f,p,d):
+def puta(f,p,d):
     aux = np.zeros(len(f))
-    for i in p:
-        a = i - d
-        b = i + d
+    for i in range(len(p)):
+        a = p[i] - d
+        b = p[i] + d
         lsup = f[b]
         linf = f[a]
         pe = (lsup - linf)/(2*d)
@@ -21,3 +21,12 @@ def puta(l,f,p,d):
         if aux[j] == 0:
             aux[j] = f[j]
     return aux
+
+
+
+
+def hola(wave,flux,lines, d = 15):
+    pks = picos(wave,flux,lineas,15)
+    rr = puta(flux,pks,d)
+    norm = flux/rr
+    return norm
