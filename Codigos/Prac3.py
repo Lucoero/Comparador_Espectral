@@ -15,12 +15,13 @@ import Herramientas as Herr
 import normalizar as Norm
 #%% Variables entrada
 
-medB = "B2IV.fits"
+medB = "B9IV.fits"
 bigB = "B2Ib.fits"
 
 
 lineas_metalicas= {
     "Si III (4552)": 4552,
+    "Ca II (K)": 3934,
     }
 
 lineas_balmer= {
@@ -31,8 +32,7 @@ lineas_helio= {
     "He I 4922": 4922,
     }
 
-bigLines = {"He I 4922": 4922,r'$H_{\gamma}$': 4340,"Si III (4552)": 4552,}
- 
+lines = {"He I 4922": 4922,r'$H_{\gamma}$': 4340,"Si III (4552)": 4552,"Ca II (K)": 3934}
 
 
 #%% Proceso principal
@@ -41,9 +41,11 @@ medFlux, medLamb = LD.Load_Miles(medB,path = "Practica_3")
 bigFlux,bigLamb = LD.Load_Miles(bigB, path = "Practica_3")
 
 # Los ploteamos para verlos
-#SSp.Compare_Spectra([medFlux,bigFlux],[medLamb,bigLamb], NameArr = ["Estrella B2IV", "Estrella B2 Ib"], title = "Estrellas Escogidas", lines = medLines)
-SSp.Lined_Spectra(bigFlux, bigLamb, lines = bigLines, title = "Espectro de la estrella B2Ib")
-# Normalizamo
+SSp.Compare_Spectra([medFlux,bigFlux],[medLamb,bigLamb], NameArr = ["Estrella B2IV", "Estrella B2 Ib"], title = "Estrellas Escogidas", lines = lines)
+SSp.Lined_Spectra(bigFlux, bigLamb, lines = lines, title = "Espectro de la estrella HD206165 (B2Ib)")
+SSp.Lined_Spectra(medFlux,medLamb,lines = lines, title = "Espectro de la estrella  HD027295 (B9IV)")
+
+# Normalizamos
 
 # Vemos normalizaciones
 
