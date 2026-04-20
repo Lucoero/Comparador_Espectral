@@ -5,8 +5,8 @@ Practica 3
 #%% Librerias
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.interpolate as interpolate
-
+import scipy.interpolate as Interpolate
+import scipy.optimize as Optimize
 
 import Load_Data as LD
 import Show_Spectra as SSp
@@ -33,5 +33,32 @@ SSp.Compare_Spectra([medFlux,bigFlux],[medLamb,bigLamb], TArr = ["Estrella 1", "
 # Vemos normalizaciones
 
 # Aislamos las lineas que queremos y las aproximamos
+def Gauss_Line(x,A,mu,sigma):
+    return A*np.exp((x-mu)**2/(2*(sigma)**2))
+    
+def Line_Fit(Lamb,Flux):
+    """
+    Line_Fit:
+        Dado un conjunto de datos de flujos y longitudes de onda (que conforman la linea),
+        tratamos de buscar una curva de ajuste utilizando una gaussiana con scipy.optimize.curvefit:
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html
+        Necesitamos:
+            1. El centro de la linea (lo tenemos, idealmente, del diccionario + findpeaks)
+            2. Una anchura media (con findpeaks otra vez)
+            3. Profundidad de la linea
+            4. Una funcion modelo a la que queremos aproximar (en nuestro caso una Gaussiana con 1. y 2,, 
+                                                               pero la podemos modificar ligeramente)
+    """
+    # Buscamos el centro de la linea, su anchura media y profundidad como semilla base
+    mu = 0 # Centro linea
+    sigma = 0 # Anchura linea
+    A = 0 # Altura linea
+    # Aproximamos con scipy
+    bestA,bestMu,bestSigma = Optimize.curve_fit(Gauss_Line,Lamb,Flux,[A,mu,sigma])[0]
+    
+    # Visualizamos
+    bestFlux = Gauss_Line(Lamb,bestA,bestMu,bestSigma)
+    SSp.Blank_Spectra([Lamb,Lamb], [Flux,bestFlux],title = "Ajuste obtenido",multiSpectra = True,spectrasNames = ["Original", "Ajuste"])
+    return bestA,bestMu,bestSigma
 
 

@@ -31,7 +31,7 @@ def Pad_Array(arr): # Gracias, https://stackoverflow.com/questions/24494356/how-
     return out
 
 
-def Blank_Spectra(lamb,flux, title = "Espectro"):
+def Blank_Spectra(lambList,fluxList, title = "Espectro", multiSpectra = False,spectrasNames = []):
     """
     Blank_Spectra:
         
@@ -40,21 +40,28 @@ def Blank_Spectra(lamb,flux, title = "Espectro"):
     """
     fig, ax = plt.subplots(figsize = (15,6))
     fig.suptitle(title)
-    Axe_Blank_Spectra(lamb, flux, ax)
+    Axe_Blank_Spectra(lambList, fluxList, ax, multiSpectra = multiSpectra, spectrasNames = spectrasNames)
     fig.show()
     return
 
-def Axe_Blank_Spectra(lamb,flux,ax, name = False, show_yName = True, show_xName = True):
+def Axe_Blank_Spectra(lambList,fluxList,ax, name = False, show_yName = True, show_xName = True, multiSpectra = False, spectrasNames = []):
     if show_xName:
         ax.set_xlabel(r"$\lambda \ (\mathring{A})$")
     if show_yName:
         ax.set_ylabel("Flux (uds)")
-    ax.plot(lamb,flux, linewidth = lWidth)
+    if multiSpectra: # Tenemos un array de lambdas de distintos espectros que queremos superponer
+        nSpectra = len(lambList)
+        if spectrasNames == []:
+            spectrasNames = [f"{i}" for i in range(nSpectra)]
+        for i in nSpectra:
+            ax.plot(lambList[i],fluxList[i], label = spectrasNames[i])
+            ax.legend()
+    ax.plot(lambList,fluxList, linewidth = lWidth)
     if name:
         ax.set_title(name,loc="right", y=.5,
         rotation=270, ha="left", va="center")
     return 
-def Lined_Spectra(lamb,flux,lines, title = "Lined_Spectra", show_yName = True):
+def Lined_Spectra(lamb,flux,lines, title = "Lined_Spectra", show_yName = True,multiSpectra = False, spectrasNames = []):
     """
     Lined_Spectra:
         Ploteamos el espectro con las lineas que queramos marcar.
@@ -63,13 +70,13 @@ def Lined_Spectra(lamb,flux,lines, title = "Lined_Spectra", show_yName = True):
     # Ploteamos espectro
     fig,ax = plt.subplots(figsize = (15,6))
     fig.suptitle(title)
-    Axe_Lined_Spectra(lamb,flux,lines,ax, show_yName = show_yName)
+    Axe_Lined_Spectra(lamb,flux,lines,ax, show_yName = show_yName,multiSpectra = multiSpectra, spectrasNames = spectrasNames)
     fig.legend(ncol = ncol)
     fig.show()
     return
  
-def Axe_Lined_Spectra(lamb,flux,lines,ax, name = False, show_yName = True, show_xName = True, show_LineName = True):
-    Axe_Blank_Spectra(lamb, flux, ax, name = name, show_yName = show_yName, show_xName = show_xName)
+def Axe_Lined_Spectra(lamb,flux,lines,ax, name = False, show_yName = True, show_xName = True, show_LineName = True, multiSpectra = False, spectrasNames = []):
+    Axe_Blank_Spectra(lamb, flux, ax, name = name, show_yName = show_yName, show_xName = show_xName, multiSpectra = multiSpectra, spectrasNames=spectrasNames)
     minLine = np.min(flux)*yscale
     maxLine = np.max(flux)*yscale
     # Ploteamos las lineas
