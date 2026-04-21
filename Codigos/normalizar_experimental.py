@@ -21,15 +21,15 @@ def picos2(wave, flux, lineas, d):
     return pki
 
 
-def continuo(fr,pr=0.1,d=5,sg=False):
+def continuo(fr,pr=0.1,d=5,sg=False,rl=0.5):
     if sg:
         f = savgol_filter(fr,5,2)
     else:
         f = fr
     pk1, _ = find_peaks(-1*f,prominence=pr,distance=d)
-    w1 = peak_widths(-1*f,pk1,rel_height=0.5)
+    w1 = peak_widths(-1*f,pk1,rel_height=rl)
     pk2, _ = find_peaks(f,prominence=pr,distance=d)
-    w2 = peak_widths(f,pk2,rel_height=0.5)
+    w2 = peak_widths(f,pk2,rel_height=rl)
     pks = np.append(pk1,pk2)
     ws = np.append(w1,w2)
     aux = np.zeros_like(fr)
@@ -46,24 +46,14 @@ def continuo(fr,pr=0.1,d=5,sg=False):
             aux[j] = f[j]
     return aux
 
-def Norm_Agg(l,fr,rang,pr=0.1,d=10):
+def Norm_Agg(fr,params = [0.1,10,False,0.5]):
+    if params[2]:
+        f = savgol_filter(fr,5,2)
+    else:
+        f = fr
+    aux = continuo(f,*params) # Sg es usar savgol o
+    return fr/aux
 
-    a = continuo(fr,sg=False) # Sg es usar savgol o no
-
-    norm = fr/a
-
-    plt.plot(l,norm)
-    plt.show()
-    return
-
-
-def npcont(l,f,pr=0.1,w=5,d=3):
-    pk1, _ = find_peaks(-1*f,prominence=pr,width=w,distance=d)
-    pk2, _ = find_peaks(f,prominence=pr,width=w,distance=d)
-    pks = np.append(pk1,pk2)
-    plt.plot(l,f,l[pks],f[pks],'*')
-    plt.show()
-    return pks
 
 def diflin(f,p,d): #aquí p es el índice del pico
     aux = np.zeros(len(f))
