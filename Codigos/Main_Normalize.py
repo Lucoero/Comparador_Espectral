@@ -17,12 +17,12 @@ import normalizar as Norm
 import LinesLib as LinesLib
 #%% Variables entrada
 isDat = True
-starFile = "Estrella1.dat"
+starFile = "Estrella2.dat"
 starDir = "Estrellas_Problema"
 outDir = "Estrellas_Problema"
-outFilename = "SN1"
+outFilename = "SN2"
 
-prominence = 0.5 # Altura de los picos en porcentaje empezando desde el fondo desde el cual mides la altura. LO BASICO A CAMBIAR
+prominence = 0.85 # Altura de los picos en porcentaje empezando desde el fondo desde el cual mides la altura. LO BASICO A CAMBIAR
 
 startNorm = 4000 # Lamb donde quieres empezar la normalizacion
 endNorm = -1 # Indice donde quieres acabar la normalizacion
