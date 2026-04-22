@@ -188,7 +188,28 @@ def Compare_Norms(defArr,normArr,fitArr = [],NameArr = False,lines = {}, title =
             lambFit, fluxFit = fitArr[i]
             ajustes, = ax[i,0].plot(lambFit,fluxFit,linestyle = "dashed")# label = "ajuste")
             #ax[i,0].legend(handles = [ajustes], loc = "upper right")
-    
+    # Cambiemos la escala de los ejes
+    maxFlux = 0
+    minFlux = 0
+    NmaxFlux = 0
+    NminFlux = 0
+    for i in range(n):
+        Lamb,Flux = defArr[i]
+        NLamb,NFlux = normArr[i]
+        maxCandidate = np.max(Flux)
+        minCandidate = np.min(Flux)
+        
+        NmaxCandidate = np.max(NFlux)
+        NminCandidate = np.min(NFlux)
+        
+        if maxCandidate < maxFlux: maxFlux = maxCandidate
+        if minCandidate > minFlux: minFlux = minCandidate
+        
+        if NmaxCandidate < NmaxFlux: NmaxFlux = NmaxCandidate
+        if NminCandidate > NminFlux: NminFlux = NminCandidate
+    for i in range(n):
+        #ax[i,0].set_ylim(minFlux,maxFlux)
+        ax[i,1].set_ylim(0,2)
     fig.legend(ncol = ncol)
     fig.show()
     return 

@@ -28,6 +28,8 @@ S4 = "estrella4.dat"
 Miles_Name = "s0001.fits"
 
 nCan = 3 # El numero de candidatos que queremos devolver 
+
+useAgg = True
 # Diccionario de lineas que vamos a marcar
 """
 Nota: Lineas mas destacables
@@ -108,7 +110,10 @@ Lamb3,Flux3 = LD.Load_Dat(S3)
 
 Lamb4,Flux4 = LD.Load_Dat(S4)
 
+
 MLamb,MFlux = LD.Load_Miles(Miles_Name)
+
+
 """
 T1 = Par.get_Temp(Lamb1, Flux1)
 T2 = Par.get_Temp(Lamb2, Flux2)
@@ -121,25 +126,37 @@ FluxsList = [Flux1,Flux2,Flux3,Flux4]
 #%% Normalizacion
 nIter = 50
 params = [97] # Es el filtro de mediana (que separacion consideras para cortar y tal)
+startNorm = 4000
+endNorm = -1
+savgolParams = [97,startNorm,endNorm, "med",nIter]
+aggParams = [startNorm,endNorm,0.1,10,False,0.7] # El ultimo parametro es la altura relativa donde interpolamos el pico (de abajo a arriba pico. 0 Es coger el fondo del pico)
 
-fit1,N1 = Norm.Normalizar(Lamb1,Flux1,params,iteraciones = nIter)
+# Normalizamos
+ajusteProblema = []
+NormProblema = []
+for i in range(4):
+    if useAgg:
+        fit,N = Norm.Norm_Agg(LambsList[i], FluxsList[i],aggParams)
+    else:
+        fit,N = Norm.Norm_Savgol(LambsList[i],FluxsList[i],savgolParams)
 
-fit2,N2 = Norm.Normalizar(Lamb2,Flux2,params,iteraciones = nIter)
-fit3,N3 = Norm.Normalizar(Lamb3,Flux3,params,iteraciones = nIter)
-fit4,N4 = Norm.Normalizar(Lamb4,Flux4,params,iteraciones = nIter)
+    ajusteProblema.append(fit)
+    NormProblema += [(LambsList[i],N)]
+# Guardamos la normalizacion
+LD.Write_Data(NormProblema,["SN1","SN2","SN3","SN4"],"Estrellas_Problema")
+# Norm.Normalise_Folder("Catalogo_Miles", "MilesNormalizado", Norm.Norm_Agg, aggParams)
 #%%% Por si quieres normalizar una base de datos en concreto
 #Norm.Normalise_Folder("Catalogo_Miles", "Miles_Normalizado")
 
 #%%% Prueba graficos
-"""
+
 normal1 = (Lamb1,Flux1)
 normal2 = (Lamb2,Flux2)
+normal3 = (Lamb3,Flux3)
+normal4 = (Lamb4,Flux4)
 
-normalizado1 = (Lamb1,N1)
-normalizado2 = (Lamb2,N2)
+SSp.Compare_Norms([normal1,normal2,normal3,normal4],NormProblema, fitArr = ajusteProblema,lines = lines,NameArr = ["S1","S2","S3","S4"])
 
-SSp.Compare_Norms([normal1,normal2],[normalizado1,normalizado2], fitArr = [fit1,fit2],lines = lines,NameArr = ["Nombre1","Nombre2"])
-"""
 #%% Busqueda del espectro
 """
 smChosen1,minD1,smCh1,DArr1 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb1,Flux1),lines = lines, distFunc = "WASS", nCandidates = nCan,Normalise_Spectras = False)
@@ -161,7 +178,7 @@ smChosen4,minD4,smCh4,DArr4 = Par.CompareAllSpectra("Catalogo_Miles", (Lamb4,Flu
 """
 #%% Ploteado
 
-SSp.Compare_Spectra(LambsList,FluxsList,NameArr = [S1,S2,S3,S4],lines = lines, title = "Estrellas Problema")
+#SSp.Compare_Spectra(LambsList,FluxsList,NameArr = [S1,S2,S3,S4],lines = lines, title = "Estrellas Problema")
 
 #SSp.Blank_Spectra(Lamb1,N1)
 """

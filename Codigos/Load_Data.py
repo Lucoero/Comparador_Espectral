@@ -72,7 +72,7 @@ def Write_Data(LambFluxLists,NameList,foldPath, showEndMessage = False):
     """
     n = len(LambFluxLists)
     if not os.path.exists(foldPath):
-        print(foldPath + "didnt exist. We created it.")
+        print(foldPath + " didnt exist. We created it.")
         os.mkdir(foldPath)
     for i in tqdm.tqdm(range(n)):
         Lamb,Flux = LambFluxLists[i]
