@@ -22,6 +22,7 @@ starDir = "Estrellas_Problema"
 outDir = "Estrellas_Problema"
 outFilename = "SN1"
 
+figTitle = "Estrella Problema 1"
 rl = 0.5 # Altura relativa de los picos empezando desde el fondo desde el cual mides la altura. LO BASICO A CAMBIAR
 
 startNorm = 4000 # Lamb donde quieres empezar la normalizacion
@@ -61,7 +62,7 @@ else:
 normSpectra = [lamb,fluxN]
 originalSpectra = [lamb,flux]
 
-SSp.Compare_Norms([originalSpectra],[normSpectra],fitArr = [fit],NameArr = ["S1"], title = "Normalización de la Estrella 1") #lines = lines)
+SSp.Compare_Norms([originalSpectra],[normSpectra],fitArr = [fit],NameArr = ["S1"], title = figTitle) #lines = lines)
 # Guardo
 LD.Write_Data([normSpectra],[outFilename],outDir)
 
