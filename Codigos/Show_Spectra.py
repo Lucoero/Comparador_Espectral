@@ -162,10 +162,13 @@ def Compare_Norms(defArr,normArr,fitArr = [],NameArr = False,lines = {}, title =
         Axe_Blank_Spectra(lambDef, fluxDef,ax[0]) # lineas solo en el normalizado
         lambNorm,fluxNorm = normArr[0]
         Axe_Lined_Spectra(lambNorm, fluxNorm, lines,ax[1], show_yName = False)
+        ax[1].set_ylim(0,1.5)
         # Ponemos los fits
-        if len(fitArr) != 0:
-            ajustes, = ax[0].plot(fitArr[0,0],fitArr[0,1],linestyle = "dashed")# label = "ajuste")
+        if len(fitArr) == 1:
+            ajustes, = ax[0].plot(fitArr[0][0],fitArr[0][1],linestyle = "dashed")# label = "ajuste")
             #ax[0].legend(handles = [ajustes], loc = "upper left")
+        elif len(fitArr) == 2:
+            ajustes, = ax[0].plot(fitArr[0],fitArr[1],linestyle = "dashed")# label = "ajuste")
     else:
         # En la primera ponemos las lineas
         lambDef,fluxDef = defArr[0]
@@ -187,29 +190,8 @@ def Compare_Norms(defArr,normArr,fitArr = [],NameArr = False,lines = {}, title =
         for i in range(len(fitArr)):  
             lambFit, fluxFit = fitArr[i]
             ajustes, = ax[i,0].plot(lambFit,fluxFit,linestyle = "dashed")# label = "ajuste")
+            ax[i,1].set_ylim(0,1.5)
             #ax[i,0].legend(handles = [ajustes], loc = "upper right")
-    # Cambiemos la escala de los ejes
-    maxFlux = 0
-    minFlux = 0
-    NmaxFlux = 0
-    NminFlux = 0
-    for i in range(n):
-        Lamb,Flux = defArr[i]
-        NLamb,NFlux = normArr[i]
-        maxCandidate = np.max(Flux)
-        minCandidate = np.min(Flux)
-        
-        NmaxCandidate = np.max(NFlux)
-        NminCandidate = np.min(NFlux)
-        
-        if maxCandidate < maxFlux: maxFlux = maxCandidate
-        if minCandidate > minFlux: minFlux = minCandidate
-        
-        if NmaxCandidate < NmaxFlux: NmaxFlux = NmaxCandidate
-        if NminCandidate > NminFlux: NminFlux = NminCandidate
-    for i in range(n):
-        #ax[i,0].set_ylim(minFlux,maxFlux)
-        ax[i,1].set_ylim(0,2)
     fig.legend(ncol = ncol)
     fig.show()
     return 
