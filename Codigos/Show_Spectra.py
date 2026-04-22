@@ -201,7 +201,7 @@ def Compare_Norms(defArr,normArr,fitArr = [],NameArr = False,lines = {}, title =
         # Ponemos los fits
         for i in range(len(fitArr)):  
             lambFit, fluxFit = fitArr[i]
-            ajustes, = ax[i,0].plot(lambFit,fluxFit,linestyle = "dashed")# label = "ajuste")
+            ajustes, = ax[i,0].plot(lambFit,fluxFit,linestyle = "dashed") # label = "ajuste")
             ax[i,1].set_ylim(0,1.5)
             #ax[i,0].legend(handles = [ajustes], loc = "upper right")
     fig.legend(ncol = ncol)

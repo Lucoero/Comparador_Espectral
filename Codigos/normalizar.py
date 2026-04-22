@@ -42,6 +42,10 @@ def Norm_Savgol(lamb,flujo, params = [97,4000,-1,"med",1]): #Donde filtro es el 
     except:
         print("No se han dado todos los parametros opcionales de Norm_Savgol. Usando parametros por defecto")
         par,start,end,filtro,iteraciones = 97,4000,-1,"med",1
+    if end >= lamb[-1]: 
+        end = -1
+    elif end != -1: 
+        end = np.where(lamb > end)[0][0] 
     ajuste = np.copy(flujo)
     start_index = np.where(lamb > start)[0][0]
     
@@ -119,7 +123,7 @@ def Norm_Agg(lamb,flujo,params = [4000,-1,0.1,10,False,0.5]):
     start_index = np.where(lamb > start)[0][0]
     flujo_cortado = flujo[start_index:end]
     lamb_cortado = lamb[start_index:end]
-    
+    print(lamb_cortado[-1])
     ajusteLocal = Continuo(flujo_cortado,pr,d,sg,rl)[0] # Sg es usar savgol
     
     # Fin ajuste
