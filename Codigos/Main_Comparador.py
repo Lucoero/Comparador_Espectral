@@ -161,10 +161,10 @@ lambCompare4 = []
 fluxCompare4 = []
 
 lambCompare4.append(Lamb4)
-fluxCompare4.append(Flux4)
+fluxCompare4.append(SN4)
 
 namesArr4 = []
-namesArr4.append(SN4)
+namesArr4.append(S4)
 for i in range(len(smCh4)):
     smLamb,smFlux = LD.Load_Dat(smCh4[i], path = "MilesNormalizado")
     lambCompare4.append(smLamb) 
