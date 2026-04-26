@@ -16,16 +16,16 @@ import Herramientas as Herr
 import normalizar as Norm
 import LinesLib as LinesLib
 #%% Variables entrada
-isDat = True
-starFile = "Estrella2.dat"
-starDir = "Estrellas_Problema"
-outDir = "Estrellas_Problema"
-outFilename = "SN2"
+isDat = False
+starFile = "B2Ib.fits"
+starDir = "Practica_3"
+outDir = "Practica_3"
+outFilename = "B2Ib"
 
-figTitle = "Estrella Problema 4"
-rl = 0.5 # Altura relativa de los picos empezando desde el fondo desde el cual mides la altura. LO BASICO A CAMBIAR
+figTitle = "Estrella Tipo B2 IV"
+rl = 0.85 # Altura relativa de los picos empezando desde el fondo desde el cual mides la altura. LO BASICO A CAMBIAR
 
-startNorm = 4000 # Lamb donde quieres empezar la normalizacion
+startNorm = 3930 # Lamb donde quieres empezar la normalizacion
 endNorm = 7000 # Indice donde quieres acabar la normalizacion
 nIter = 50 # N iteraciones si usas filtro savgol
 savgolParams = [97,startNorm,endNorm, "med",nIter]
@@ -37,7 +37,7 @@ Agg Params:
     sg: Si queremos usar filtro savgol para eliminar ruido antes de normalizar
     rl: Altura relativa de los picos empezando desde el fundo del pico
 """
-aggParams = [startNorm,endNorm,0.1,10,False,rl] # El ultimo parametro es la altura relativa donde interpolamos el pico (de abajo a arriba pico. 0 Es coger el fondo del pico)
+aggParams = [startNorm,endNorm,0.08,10,False,rl] # El ultimo parametro es la altura relativa donde interpolamos el pico (de abajo a arriba pico. 0 Es coger el fondo del pico)
 useAgg = True
 
 # Si quieres normalizar una carpeta entera
@@ -62,7 +62,7 @@ else:
 normSpectra = [lamb,fluxN]
 originalSpectra = [lamb,flux]
 
-SSp.Compare_Norms([originalSpectra],[normSpectra],fitArr = [fit],NameArr = ["S1"], title = figTitle) #lines = lines)
+SSp.Compare_Norms([originalSpectra],[normSpectra],fitArr = [fit],NameArr = ["S1"], title = figTitle)# lines = lines)
 # Guardo
 LD.Write_Data([normSpectra],[outFilename],outDir)
 
