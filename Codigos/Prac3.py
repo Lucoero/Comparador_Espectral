@@ -29,7 +29,7 @@ medFlux, medLamb = LD.Load_Dat(medB,path = "Practica_3")
 bigFlux,bigLamb = LD.Load_Dat(bigB, path = "Practica_3")
 
 # Los ploteamos para verlos
-SSp.Compare_Spectra([medFlux,bigFlux],[medLamb,bigLamb], NameArr = ["Estrella B9IV (HD027295)", "Estrella B2 Ib (HD206165)"], title = "Estrellas Escogidas Normalizadas", lines = lines)
+SSp.Compare_Spectra([medFlux,bigFlux],[medLamb,bigLamb], NameArr = ["Estrella B2IV (HD000886)", "Estrella B2 Ib (HD206165)"], title = "Estrellas Escogidas Normalizadas", lines = lines)
 """
 SSp.Lined_Spectra(bigFlux, bigLamb, lines = lines, title = "Espectro de la estrella HD206165 (B2Ib)")
 SSp.Lined_Spectra(medFlux,medLamb,lines = lines, title = "Espectro de la estrella  HD027295 (B9IV)")
