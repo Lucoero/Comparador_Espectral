@@ -4,47 +4,58 @@ Practica 3
 """
 #%% Librerias
 import numpy as np
-import matplotlib.pyplot as plt
-import scipy.interpolate as Interpolate
+
 import scipy.optimize as Optimize
 import scipy.stats as stats
 import scipy.special as special
+from scipy.signal import find_peaks
+from scipy.signal import peak_widths
 
 import Load_Data as LD
 import Show_Spectra as SSp
 import parametros as Par
-import Herramientas as Herr
-import normalizar as Norm
-#%% Variables entrada
+#%% Funciones
 
-medB = "B2IV.dat"
-bigB = "B2Ib.dat"
-
-lines = {"He I 4922": 4922,r'$H_{\gamma}$': 4340,"Mg II 4481": 4481}
-
-
-#%% Proceso principal
-
-medFlux, medLamb = LD.Load_Dat(medB,path = "Practica_3")
-bigFlux,bigLamb = LD.Load_Dat(bigB, path = "Practica_3")
-
-# Los ploteamos para verlos
-SSp.Compare_Spectra([medFlux,bigFlux],[medLamb,bigLamb], NameArr = ["Estrella B9IV (HD027295)", "Estrella B2 Ib (HD206165)"], title = "Estrellas Escogidas Normalizadas", lines = lines)
-"""
-SSp.Lined_Spectra(bigFlux, bigLamb, lines = lines, title = "Espectro de la estrella HD206165 (B2Ib)")
-SSp.Lined_Spectra(medFlux,medLamb,lines = lines, title = "Espectro de la estrella  HD027295 (B9IV)")
-"""
-# Normalizamos
-
-# Vemos normalizaciones
-
-# Obtenemos las propiedades de la linea
-
-# Aislamos las lineas que queremos y las aproximamos
-lambMet = lines["Ca II (K)"]
-lambHe = lines["He I 4922"]
-lambBa = lines[r'$H_{\gamma}$']
-
+def Get_Lines_Features(Lamb,Flux,lines,searchWindow = 400):
+    """
+    Get_Lines_Features:
+        Dado un espectro y el diccionario de las lineas deseadas,
+        devuelve las propiedades fundamentales de las lineas en forma de 
+        [ubicacion,anchura-mitadAltura,profundidad]
+    
+    TODO: Tener en cuenta tambien lineas de absorcion
+    """
+    # Recortamos en torno a las lineas para la busqueda
+    linesNames = list(lines.keys())
+    nLines = len(linesNames)
+    linesFeatures = np.zeros((nLines,3)) # [peakPos,peakWidth,peakHeight]
+    midWind = searchWindow/2
+    lambsCrop = []
+    for i in range(nLines):
+        leftLamb = np.where(lines[linesNames[i]]-midWind >= Lamb)[0][0]
+        rightLamb = np.where(lines[lines[linesNames[i]]]+midWind >= Lamb)[0][0]
+        # Buscamos los picos en cada corte
+        peakAux, properties = find_peaks(Flux[leftLamb:rightLamb]) # El resto de parametros opcionales, porque deberia ser sencillo encontrarlo
+        
+        # Buscamos el pico mas cercano al centro
+        indexMin = 0
+        minDist = searchWindow
+        for j in range(len(peakAux)):
+            dist = abs(peakAux[j]-lines[linesNames[i]])
+            if dist < minDist:
+                minDist = dist
+                indexMin = j
+        linesFeatures[i,0] = peakAux[indexMin]
+        linesProp = properties[properties.keys[indexMin]]
+        # Obtenemos anchura
+        linesFeatures[i,1] = linesProp['widths']
+        # Obtenemos altura
+        linesFeatures[i,2] = linesProp['peak_heights'] # TODO: VER QUE HEIGTH METER EN FINDPEAKS
+        # Obtenemos el corte donde se ven estas propiedades
+        leftLamb = np.where(peakAux-linesProp['widths']/2  >= Lamb)[0][0]
+        rightLamb = np.where(peakAux+linesProp['widths']/2 >= Lamb)[0][0]
+        lambsCrop.append(np.array(Lamb[leftLamb:rightLamb]))
+    return linesProp, lambsCrop
 
 def Gauss_Line(x,A,mu,sigma):
     return A*np.exp((x-mu)**2/(2*(sigma)**2))
@@ -107,3 +118,52 @@ def Line_Fit(Lamb,Flux, lineCenter,lineWidth,lineHeight):
     return [[gaussA,gaussMu,gaussSigma], [lorA,lorMu,lorSigma],[voigtA,voigtMu,voigtGamma]], minIndex
 
 
+
+#%% Variables entrada 
+
+medB = "B2IV.dat"
+bigB = "B2Ib.dat"
+
+lines = {"He I 4922": 4922,r'$H_{\gamma}$': 4340,"Mg II 4481": 4481}
+
+
+#%% Proceso principal
+linesNames = list(lines.keys)
+nlines = len(linesNames)
+# Cogemos data (ya normalizada)
+medFlux, medLamb = LD.Load_Dat(medB,path = "Practica_3")
+bigFlux,bigLamb = LD.Load_Dat(bigB, path = "Practica_3")
+
+# Los ploteamos para verlos
+SSp.Compare_Spectra([medFlux,bigFlux],[medLamb,bigLamb], NameArr = ["Estrella B9IV (HD027295)", "Estrella B2 Ib (HD206165)"], title = "Estrellas Escogidas Normalizadas", lines = lines)
+"""
+SSp.Lined_Spectra(bigFlux, bigLamb, lines = lines, title = "Espectro de la estrella HD206165 (B2Ib)")
+SSp.Lined_Spectra(medFlux,medLamb,lines = lines, title = "Espectro de la estrella  HD027295 (B9IV)")
+"""
+
+# Obtenemos las propiedades de la linea
+medFea,medLambsCrop = Get_Lines_Features(medLamb,medFlux,lines)
+bigFea,bigLambsCrop = Get_Lines_Features(bigLamb,bigFlux,lines)
+
+fits = ["Gaussiana","Lorentziana","Voigt"]
+# Buscamos el mejor perfil
+for i in range(nlines):
+    # Obtenemos los parametros para cada 
+    print(40*"-" + f"Resultados para la linea {linesNames[i]}:")
+
+    medParams, medIndex = Line_Fit(medLamb,medFlux,medFea[i,0],medFea[i,1],medFea[i,2])
+    bigParams,bigIndex = Line_Fit(medLamb,medFlux,medFea[i,0],medFea[i,1],medFea[i,2])
+    
+    print(f"ESTRELLA {medB}, linea {linesNames[i]}:")
+    print(f"\t Mejor Fit: {fits[medIndex]}")
+    print(f"\t Posicion: {medParams[i,0]}")
+    print(f"\t Anchura a media altura: {medParams[i,1]}")
+    print(f"\t Altura: {medParams[i,2]}")
+    print("")
+    print(80*("*"))
+    print(f"ESTRELLA {bigB}, linea {linesNames[i]}:")
+    print(f"\t Mejor Fit: {fits[bigIndex]}")
+    print(f"\t Posicion: {bigParams[i,0]}")
+    print(f"\t Anchura a media altura: {bigParams[i,1]}")
+    print(f"\t Altura: {bigParams[i,2]}")
+    print("")
