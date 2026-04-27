@@ -13,7 +13,9 @@ from scipy.signal import peak_widths
 
 import Load_Data as LD
 import Show_Spectra as SSp
-import parametros as Par
+
+import warnings
+warnings.filterwarnings('ignore')
 #%% Funciones
 
 def Get_Lines_Features(Lamb,Flux,lines,searchWindow = 500):
@@ -55,31 +57,32 @@ def Get_Lines_Features(Lamb,Flux,lines,searchWindow = 500):
         linesFeatures[i,0] = peakAux[indexMin]
         #print(linesFeatures[i,0])
         # Obtenemos anchura
-        aux = peak_widths(-fCrop,[peakIndex[indexMin]],rel_height = 0.95)
+        aux = peak_widths(-fCrop,[peakIndex[indexMin]],rel_height = 0.5) # La altura es
         width =  aux[0]
-        height = aux[1]
+        window_Width = peak_widths(-fCrop,[peakIndex[indexMin]],rel_height =0.95)[0]
+        height =  fCrop[peakIndex[indexMin]] - 1
         linesFeatures[i,1] = width[0]
         # Obtenemos altura
-        linesFeatures[i,2] = height[0]
+        linesFeatures[i,2] = height
         # Obtenemos el corte donde se ven estas propiedades
-        leftLamb = np.where(Lamb >= linesFeatures[i,0]-linesFeatures[i,1]/2)[0][0]
-        rightLamb = np.where(Lamb >= linesFeatures[i,0]+linesFeatures[i,1]/2)[0][0]
+        leftLamb = np.where(Lamb >= linesFeatures[i,0]-window_Width/2)[0][0]
+        rightLamb = np.where(Lamb >= linesFeatures[i,0]+window_Width/2)[0][0]
         lambsCrop.append(np.array(Lamb[leftLamb:rightLamb]))
         fluxsCrop.append(np.array(Flux[leftLamb:rightLamb]))
-    return linesFeatures, lambsCrop,fluxsCrop
+    return linesFeatures,lambsCrop,fluxsCrop
 
 def Gauss_Line(x,A,mu,sigma):
-    return A*np.exp((x-mu)**2/(2*(sigma)**2))
+    return 1-A*np.exp((x-mu)**2/(2*(sigma)**2))
 
 def Lorentz_Line(x,A,mu,sigma):
-    return A*1/(1+(x-mu)**2/(sigma**2))
+    return 1-A/(1+(x-mu)**2/(sigma**2))
 
 def Voigt_Line(x,A,mu,gamma): 
     """
     Detalle interesante: Si obtenemos sigma= 0 es lorentziana. gamma = 0, es gaussiana.
     gamma es la anchura a media altura
     """
-    return A*special.voigt_profile(x,mu,gamma) 
+    return 1-A*special.voigt_profile(x,mu,gamma) 
 
 def Line_Fit(Lamb,Flux, lineCenter,lineWidth,lineHeight):
     """
@@ -104,7 +107,7 @@ def Line_Fit(Lamb,Flux, lineCenter,lineWidth,lineHeight):
         dArr[0] = stats.wasserstein_distance(Flux, Gauss_Line(Lamb,gaussA,gaussMu,gaussSigma))
         print(gaussA,gaussMu,gaussSigma)
     except RuntimeError: # No converge --> Muy mala aproximacion
-        (gaussA,gaussMu,gaussSigma),gaussErr = (0.001,0.001,0.001),np.inf
+        (gaussA,gaussMu,gaussSigma),gaussErr = (None,None,None),np.inf
         dArr[0] = np.inf
     namesArr.append("Gaussian Profile")
     
@@ -113,7 +116,7 @@ def Line_Fit(Lamb,Flux, lineCenter,lineWidth,lineHeight):
         (lorA,lorMu,lorSigma),lorErr = Optimize.curve_fit(Lorentz_Line,Lamb,Flux,p0=[lineHeight,lineCenter,lineWidth])
         dArr[1] = stats.wasserstein_distance(Flux, Lorentz_Line(Lamb,lorA,lorMu,lorSigma))
     except RuntimeError:
-        (lorA,lorMu,lorSigma),lorErr = (0.001,0.001,0.001),np.inf
+        (lorA,lorMu,lorSigma),lorErr = (None,None,None),np.inf
         dArr[1] = np.inf
     namesArr.append("Lorentzian Profile")
     
@@ -122,7 +125,7 @@ def Line_Fit(Lamb,Flux, lineCenter,lineWidth,lineHeight):
         (voigtA,voigtMu,voigtGamma),voigtErr = Optimize.curve_fit(Voigt_Line, Lamb, Flux, p0=[lineHeight,lineCenter,lineWidth]) 
         dArr[2] = stats.wasserstein_distance(Flux, Voigt_Line(Lamb,voigtA,voigtMu,voigtGamma))
     except RuntimeError:
-        (voigtA,voigtMu,voigtGamma),voigtErr = (0.001,0.001,0.001),np.inf
+        (voigtA,voigtMu,voigtGamma),voigtErr = (None,None,None),np.inf
         dArr[2] = np.inf
     namesArr.append("Voigt Profile")
     #print(dArr)
@@ -138,8 +141,8 @@ def Line_Fit(Lamb,Flux, lineCenter,lineWidth,lineHeight):
         minName = namesArr[minIndex]
         
         print(f"Line_Fit concludes that the best profile is {minName}, with distance D = {minD}")
-        print("Returning all profiles data and best index")
-    return [[gaussA,gaussMu,gaussSigma], [lorA,lorMu,lorSigma],[voigtA,voigtMu,voigtGamma]], minIndex
+        print(f"All distances: {dArr}")
+    return [np.array([gaussA,gaussMu,gaussSigma]), np.array([lorA,lorMu,lorSigma]),np.array([voigtA,voigtMu,voigtGamma])], minIndex
 
 
 
@@ -159,6 +162,7 @@ bigLamb,bigFlux = LD.Load_Dat(bigB, path = "Practica_3")
 
 # Los ploteamos para verlos
 SSp.Compare_Spectra([medLamb,bigLamb],[medFlux,bigFlux], NameArr = ["Estrella B9IV (HD027295)", "Estrella B2 Ib (HD206165)"], title = "Estrellas Escogidas Normalizadas", lines = lines)
+
 """
 SSp.Lined_Spectra(bigFlux, bigLamb, lines = lines, title = "Espectro de la estrella HD206165 (B2Ib)")
 SSp.Lined_Spectra(medFlux,medLamb,lines = lines, title = "Espectro de la estrella  HD027295 (B9IV)")
@@ -178,16 +182,61 @@ for i in range(nlines):
     medParams, medIndex = Line_Fit(medLambsCrop[i],medFluxsCrop[i],medFea[i,0],medFea[i,1],medFea[i,2])
     bigParams,bigIndex = Line_Fit(bigLambsCrop[i],bigFluxsCrop[i],bigFea[i,0],bigFea[i,1],bigFea[i,2])
     # Visualizamos
-    gaussFlux = Gauss_Line(medLambsCrop[i],medParams[0][0],medParams[0][1],medParams[0][2])
-    lorFlux = Lorentz_Line(medLambsCrop[i],medParams[1][0],medParams[1][1],medParams[1][2])
-    voigtFlux = Voigt_Line(medLambsCrop[i],medParams[2][0],medParams[2][1],medParams[2][2])
-    SSp.Blank_Spectra([medLambsCrop[i],medLambsCrop[i],medLambsCrop[i],medLambsCrop[i]], [medFluxsCrop[i],gaussFlux,lorFlux,voigtFlux],title = f"Comparacion de ajustes de línea {linesNames[i]} para {medB}",multiSpectra = True,spectrasNames = ["Original", "Gaussian","Lorentzian","Voigt"])
+    LambToPlot = [medLambsCrop[i]]
+    FluxToPlot = [medFluxsCrop[i]]
+    NamesToPlot = ["Original"]
+    Selected = []
+    if not  (medParams[0][0] == None): # Gaussiana converge
+        LambToPlot.append(medLambsCrop[i])   
+        FluxToPlot.append(Gauss_Line(medLambsCrop[i],medParams[0][0],medParams[0][1],medParams[0][2]))
+        NamesToPlot.append("Gaussiana")
+        if medIndex == 0:
+            Selected = FluxToPlot[-1] # Que es el que acabamos de añadir
+    if not (medParams[1][0] == None):
+        LambToPlot.append(medLambsCrop[i])
+        FluxToPlot.append(Lorentz_Line(medLambsCrop[i],medParams[1][0],medParams[1][1],medParams[1][2]))
+        NamesToPlot.append("Lorentziana")
+        if medIndex == 1:
+            Selected = FluxToPlot[-1] # Que es el que acabamos de añadir
+    if not (medParams[2][0] == None):
+        LambToPlot.append(medLambsCrop[i])
+        FluxToPlot.append(Voigt_Line(medLambsCrop[i],medParams[2][0],medParams[2][1],medParams[2][2]))
+        NamesToPlot.append("Voigt")
+        if medIndex == 2:
+            Selected = FluxToPlot[-1] # Que es el que acabamos de añadir
+    #SSp.Blank_Spectra(LambToPlot, FluxToPlot,title = f"Comparacion de ajustes de línea {linesNames[i]} para {medB}",multiSpectra = True,spectrasNames = NamesToPlot)
     
-    gaussFlux = Gauss_Line(bigLambsCrop[i],bigParams[0][0],bigParams[0][1],bigParams[0][2])
-    lorFlux = Lorentz_Line(bigLambsCrop[i],bigParams[1][0],bigParams[1][1],bigParams[1][2])
-    voigtFlux = Voigt_Line(bigLambsCrop[i],bigParams[2][0],bigParams[2][1],bigParams[2][2])
-    SSp.Blank_Spectra([bigLambsCrop[i],bigLambsCrop[i],bigLambsCrop[i],bigLambsCrop[i]], [bigFluxsCrop[i],gaussFlux,lorFlux,voigtFlux],title = f"Comparacion de ajustes de línea {linesNames[i]} para {bigB}",multiSpectra = True,spectrasNames = ["Original", "Gaussian","Lorentzian","Voigt"])
+    # Si solo quieres ver con el mejor ajuste
+    SSp.Blank_Spectra([medLambsCrop[i],medLambsCrop[i]],[medFluxsCrop[i],Selected],multiSpectra = True,title = f"Mejor ajuste para línea {linesNames[i]} de {medB}", spectrasNames = ["Original",fits[medIndex]])
     
+    
+    LambToPlot = [medLambsCrop[i]]
+    FluxToPlot = [medFluxsCrop[i]]
+    NamesToPlot = ["Original"]
+    Selected = [] # El mejor ajuste
+    if not  (bigParams[0][0] == None): # Gaussiana converge
+        LambToPlot.append(bigLambsCrop[i])    
+        FluxToPlot.append(Gauss_Line(bigLambsCrop[i],bigParams[0][0],bigParams[0][1],bigParams[0][2]))
+        NamesToPlot.append("Gaussiana")
+        if medIndex == 0:
+            Selected = FluxToPlot[-1] # Que es el que acabamos de añadir
+    if not (bigParams[1][0] == None):
+        LambToPlot.append(bigLambsCrop[i])
+        FluxToPlot.append(Lorentz_Line(bigLambsCrop[i],bigParams[1][0],bigParams[1][1],bigParams[1][2]))
+        NamesToPlot.append("Lorentziana")
+        if medIndex == 1:
+            Selected = FluxToPlot[-1] # Que es el que acabamos de añadir
+    if not (bigParams[2][0] == None):
+        print(bigParams[2][0])
+        LambToPlot.append(bigLambsCrop[i])
+        FluxToPlot.append(Voigt_Line(bigLambsCrop[i],bigParams[2][0],bigParams[2][1],bigParams[2][2]))
+        NamesToPlot.append("Voigt")
+        if medIndex == 2:
+            Selected = FluxToPlot[-1] # Que es el que acabamos de añadir
+    #SSp.Blank_Spectra(LambToPlot, FluxToPlot,title = f"Comparacion de ajustes de línea {linesNames[i]} para {bigB}",multiSpectra = True,spectrasNames = NamesToPlot)
+    
+    # Si solo quieres ver el mejor ajuste
+    SSp.Blank_Spectra([bigLambsCrop[i],bigLambsCrop[i]],[bigFluxsCrop[i],Selected],multiSpectra = True,title = f"Mejor ajuste para línea {linesNames[i]} de {bigB}", spectrasNames = ["Original",fits[bigIndex]])
     print(f"--> ESTRELLA {medB}, linea {linesNames[i]}:")
     print(f"\t Mejor Fit: {fits[medIndex]}")
     print(f"\t Amplitud (uds): {medParams[i][0]}")
