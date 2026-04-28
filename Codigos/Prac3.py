@@ -54,14 +54,14 @@ def Get_Lines_Features(Lamb,Flux,lines,searchWindow = 500):
             if dist < minDist:
                 minDist = dist
                 indexMin = j
-        linesFeatures[i,0] = peakAux[indexMin]
+        linesFeatures[i,0] = peakAux[indexMin] 
         #print(linesFeatures[i,0])
         # Obtenemos anchura
         aux = peak_widths(-fCrop,[peakIndex[indexMin]],rel_height = 0.5) # La altura es
         width =  aux[0]
         window_Width = peak_widths(-fCrop,[peakIndex[indexMin]],rel_height =0.95)[0]
         height =  fCrop[peakIndex[indexMin]] - 1
-        linesFeatures[i,1] = width[0]
+        linesFeatures[i,1] = width[0]/2
         # Obtenemos altura
         linesFeatures[i,2] = height
         # Obtenemos el corte donde se ven estas propiedades
@@ -99,7 +99,7 @@ def Line_Fit(Lamb,Flux, lineCenter,lineWidth,lineHeight):
     """
     profiles = 3 # Numero de perfiles que usamos
     dArr = np.zeros(profiles) # Array de distancias que obtenemos
-    namesArr = [] # Array del nombre de cada metodo
+    namesArr = ["Gaussian Profile", "Lorentzian Profile", "Voigt Profile"] # Array del nombre de cada metodo
     
     # Aproximamos con scipy a Gaussiana
     try: 
@@ -109,8 +109,7 @@ def Line_Fit(Lamb,Flux, lineCenter,lineWidth,lineHeight):
     except RuntimeError: # No converge --> Muy mala aproximacion
         (gaussA,gaussMu,gaussSigma),gaussErr = (None,None,None),np.inf
         dArr[0] = np.inf
-    namesArr.append("Gaussian Profile")
-    
+
     # Aproximamos con scipy a Lorentziana
     try:
         (lorA,lorMu,lorSigma),lorErr = Optimize.curve_fit(Lorentz_Line,Lamb,Flux,p0=[lineHeight,lineCenter,lineWidth])
@@ -118,7 +117,7 @@ def Line_Fit(Lamb,Flux, lineCenter,lineWidth,lineHeight):
     except RuntimeError:
         (lorA,lorMu,lorSigma),lorErr = (None,None,None),np.inf
         dArr[1] = np.inf
-    namesArr.append("Lorentzian Profile")
+
     
     # Aproximamos con scipy a perfil de Voigt
     try:
@@ -127,7 +126,7 @@ def Line_Fit(Lamb,Flux, lineCenter,lineWidth,lineHeight):
     except RuntimeError:
         (voigtA,voigtMu,voigtGamma),voigtErr = (None,None,None),np.inf
         dArr[2] = np.inf
-    namesArr.append("Voigt Profile")
+
     #print(dArr)
     # Tomamos el minimo
     if dArr.all == np.inf:
@@ -218,20 +217,20 @@ for i in range(nlines):
         LambToPlot.append(bigLambsCrop[i])    
         FluxToPlot.append(Gauss_Line(bigLambsCrop[i],bigParams[0][0],bigParams[0][1],bigParams[0][2]))
         NamesToPlot.append("Gaussiana")
-        if medIndex == 0:
+        if bigIndex == 0:
             Selected = FluxToPlot[-1] # Que es el que acabamos de añadir
     if not (bigParams[1][0] == None):
         LambToPlot.append(bigLambsCrop[i])
         FluxToPlot.append(Lorentz_Line(bigLambsCrop[i],bigParams[1][0],bigParams[1][1],bigParams[1][2]))
         NamesToPlot.append("Lorentziana")
-        if medIndex == 1:
+        if bigIndex == 1:
             Selected = FluxToPlot[-1] # Que es el que acabamos de añadir
     if not (bigParams[2][0] == None):
         print(bigParams[2][0])
         LambToPlot.append(bigLambsCrop[i])
         FluxToPlot.append(Voigt_Line(bigLambsCrop[i],bigParams[2][0],bigParams[2][1],bigParams[2][2]))
         NamesToPlot.append("Voigt")
-        if medIndex == 2:
+        if bigIndex == 2:
             Selected = FluxToPlot[-1] # Que es el que acabamos de añadir
     #SSp.Blank_Spectra(LambToPlot, FluxToPlot,title = f"Comparacion de ajustes de línea {linesNames[i]} para {bigB}",multiSpectra = True,spectrasNames = NamesToPlot)
     
